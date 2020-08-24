@@ -1,0 +1,79 @@
+/*
+ * Reads up to 100 whitespace seperated words from stdin to store and work on.
+ * These words are then dynamically allocated memory and stored in a char pointer array.
+ * The average word length is then calculated.
+ * Words longer than average are printed out in order recursively.
+ * @param void
+ * @returns EXIT_SUCCESS (or EXIT_FAILURE if a call to emalloc fails).
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_WORDS 100
+#define STR_LEN 80
+
+/*
+ * This method handles dynamic memory allocation.
+ * @param s the size of memory to be allocated.
+ */
+void *emalloc(size_t s){
+    void *result = malloc(s);
+    if(NULL == result){
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(EXIT_FAILURE);
+    }
+    return result;
+}
+
+/*
+ * Iterates through the words to get the av word len.
+ * @param a the array of char pointers.
+ * @param n the size of the array.
+ */
+double calc_av(char **a, int n){
+    int i;
+    double total_len = 0.0;
+
+    for(i = 0; i < n; i++){
+        total_len += strlen(a[i]);
+    }
+    return total_len / n;
+}
+
+/*
+ *Recursively prints out the words with a len greater than the av.
+ * @param a the array of char pointers.
+ * @param av the average word len.
+ * @param n the size of the array.
+ */
+void print_array(char **a, double av,  int n){
+    if(n > 0){
+        if(strlen(a[0]) > av){
+            fprintf(stdout, "%s\n", a[0]);
+        }
+        print_array(a + 1, av,  n-1);
+    }
+}
+
+int main(void){
+    char word[STR_LEN];
+    char *word_array[MAX_WORDS];
+    int i, count = 0;
+    double average_len;
+
+    while(count< MAX_WORDS && 1 ==scanf("%79s ", word)){
+        word_array[count] = emalloc((strlen(word) + 1) * sizeof word_array[0][0]);
+        strcpy(word_array[count], word);
+        count++;
+    }
+    if(count > 0){
+        average_len = calc_av(word_array, count);
+        fprintf(stderr, "%.2f\n", average_len);
+        print_array(word_array, average_len, count);
+    }
+    for(i = 0; i < count; i++){
+        free(word_array[i]);
+    }
+    return EXIT_SUCCESS;
+}
